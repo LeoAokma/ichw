@@ -82,8 +82,6 @@ print('The Size of the wall is \033[1;32;m{}x{}\033[0m.'.format(m, n))
 a, b = input_validation('the length of the bricks', int), input_validation('the width of the wall', int)
 print('The Size of the brick is \033[1;32;m{}x{}\033[0m.'.format(a, b))
 
-if a == b:
-    rectangle = True
 start = time.time()
 # generating the hash sheets
 hash_sheet = generate_sheet(m, n)
@@ -130,18 +128,22 @@ def coordinate_matrix_modify(hash_matrix, lx, ly, rx, ry, to_value, check_same=F
     return skip_row
 
 
-def recursion(step):
+def recursion(step, coor_x, coor_y):
     global fill_times
     if step < fill_times:
-        new_mode = [x for x in all_mode if x['status'] is False]
-        for thing in new_mode:
-            edge_left = False
-            edge_right = False
-            if thing['x_l'] == 0 or hash_sheet[thing['y_l']][thing['x_l']-1] == 1:
-                edge_left = True
-            if thing['y_l'] == 0 or hash_sheet[thing['y_l']-1][thing['x_l']] == 1:
-                edge_right = True
-            if edge_right and edge_left:
+        for thing in all_mode:
+            isFind = False
+            for row in range(coor_y, n):
+                if not isFind:
+                    for col in range(0, m):
+                        if hash_sheet[row][col] == 0:
+                            if (row == 0 or hash_sheet[row - 1][col] == 1) and (col == 0 or hash_sheet[row][col - 1] == 1):
+                                coor_y = row
+                                coor_x = col
+                                isFind = True
+                else:
+                    break
+            if coor_x == thing['x_l'] and coor_y == thing['y_l']:
                 isSkip = coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
                                                   thing['x_r'], thing['y_r'], 1, check_same=True)
                 if not isSkip:
@@ -150,54 +152,15 @@ def recursion(step):
                     # print_sheet(label_sheet, 'Label sheet')
                     coordinate_matrix_modify(position_sheet, thing['x_l'], thing['y_l'],
                                              thing['x_l'], thing['y_l'], 1)
-                    if thing['dirc'] == 1:
-                        coordinate_matrix_modify(position_1, thing['x_l'], thing['y_l'],
-                                                 thing['x_l'], thing['y_l'], 1)
-                    if thing['dirc'] == 2:
-                        coordinate_matrix_modify(position_2, thing['x_l'], thing['y_l'],
-                                                 thing['x_l'], thing['y_l'], 1)
-                    # Checking is current hash can be modified
-                    suspend_1 = False
-                    suspend_2 = False
-                    """
-                    if len(result_position_1) != 0:
-                        for result in result_position_1:
-                            for row in range(0, len(hash_1)):
-                                for col in range(0, len(hash_1[row])):
-                                    hash_1[row][col] = result[row][col] - position_1[row][col]
-                            for row in hash_1:
-                                for col in row:
-                                    if col < 0:
-                                        suspend_1 = True
-                                        break
-                    if len(result_position_2) != 0:
-                        for result in result_position_2:
-                            for row in range(0, len(hash_1)):
-                                for col in range(0, len(hash_1[row])):
-                                    hash_2[row][col] = result[row][col] - position_2[row][col]
-                            for row in hash_2:
-                                for col in row:
-                                    if col < 0:
-                                        suspend_2 = True
-                                        break
-                    """
-                    if not (suspend_1 and suspend_2):
-                        thing['status'] = True
-                        recursion(step + 1)
+                    # recurse the next step
+                    recursion(step + 1, coor_x, coor_y)
                     # if dont recurse, undo the changes
                     coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
                                              thing['x_r'], thing['y_r'], 0)
                     coordinate_matrix_modify(position_sheet, thing['x_l'], thing['y_l'],
                                              thing['x_l'], thing['y_l'], 0)
-                    if thing['dirc'] == 1:
-                        coordinate_matrix_modify(position_1, thing['x_l'], thing['y_l'],
-                                                 thing['x_l'], thing['y_l'], 0)
-                    if thing['dirc'] == 2:
-                        coordinate_matrix_modify(position_2, thing['x_l'], thing['y_l'],
-                                                 thing['x_l'], thing['y_l'], 0)
                     coordinate_matrix_modify(label_sheet, thing['x_l'], thing['y_l'],
                                              thing['x_r'], thing['y_r'], 0)
-                    thing['status'] = False
 
     elif step == fill_times:
         # print_sheet(hash_sheet, 'Hash check:')
@@ -258,9 +221,12 @@ for x in range(0, m):
 # print(ll_mode, len(ll_mode), lw_mode, len(lw_mode), sep='\n')
 fill_times = int(m*n/a/b)
 # here begin the main analyse and arrangements of the brick
-all_mode = ll_mode+lw_mode
+if a == b:
+    all_mode = ll_mode
+else:
+    all_mode = ll_mode+lw_mode
 if canFill:
-    recursion(0)
+    recursion(0, 0, 0)
 """
 # only for testing
 for thing in result_label:
@@ -268,36 +234,26 @@ for thing in result_label:
 for thing in result_position:
     print_sheet(thing, "Position Diagram:")
 """
-# check if they are the same
-out_label = []
-out_position = []
-
-for thing in result_position:
-    if thing not in out_position:
-        ind = result_position.index(thing)
-        out_position.append(thing)
-        out_label.append(result_label[ind])
-
-for thing in out_label:
+for thing in result_label:
     print_sheet(thing, 'Final Result')
 end = time.time()
 duration = end - start
-print('There are {} forms of arrangements'.format(len(out_label)))
+print('There are {} forms of arrangements'.format(len(result_label)))
 print('Time consuming: {:.3}s'.format(duration))
 print('Times that recurse: {}'.format(len(number)))
 
 print("Standardized form of output:")
 # converting hash into standard form:
-for num in range(0, len(out_label)):
+for num in range(0, len(result_label)):
     all_brick = []
     while len(all_brick) < m*n/a/b:
         for index in range(0, int(m*n/a/b)):
             brick = []
             while len(brick) < a*b:
-                for row in range(0, len(out_label[num])):
-                    for col in range(0, len(out_label[num][row])):
-                        if out_label[num][row][col] == index:
-                            coor = row*len(out_label[num][row]) + col + 1
+                for row in range(0, len(result_label[num])):
+                    for col in range(0, len(result_label[num][row])):
+                        if result_label[num][row][col] == index:
+                            coor = row*len(result_label[num][row]) + col + 1
                             brick.append(coor)
             all_brick.append(brick)
             print(brick)
