@@ -244,26 +244,35 @@ a_t.up()
 a_t.goto(0, -300)
 a_t.down()
 # drawing inner rectangle
-width = 500/min(m, n)
+width = 200/min(m, n)
 a_t.right(90)
-
+a_t.pensize(width)
 
 if a == b:
     result = result_label[0]
 else:
     result = result_label[random.randint(0, len(result_label))]
 
+a_t.shape('square')
+a_t.up()
+a_t.left(90)
 for row in range(0, len(result)):
     for col in range(0, len(result[row])):
-        a_t.up()
-        a_t.goto(-300 + col * width, 300 - row * width)
+        # a_t.goto(-300 + col * width, 300 - row * width)
+        a_t.goto(-300 + col * width, 300 - row * width - 0.5*width)
+        a_t.stamp()
         screen.colormode(255)
+        a_t.color(colors[(result[row][col]) - 1])
+        a_t.forward(width)
+        """
         a_t.fillcolor(colors[(result[row][col]) - 1])
         a_t.begin_fill()
         for i in range(0, 4):
             a_t.forward(width)
             a_t.left(90)
         a_t.end_fill()
+        """
+a_t.hideturtle()
 t.done()
 for thing in standard_result:
     print(thing)
