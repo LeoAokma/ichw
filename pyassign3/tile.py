@@ -1,11 +1,9 @@
 import turtle as t
 from copy import deepcopy
 import time
+import random
 # initialize lists of results:
 result_label = []
-result_position = []
-result_position_1 = []
-result_position_2 = []
 number = []
 
 
@@ -85,16 +83,8 @@ print('The Size of the brick is \033[1;32;m{}x{}\033[0m.'.format(a, b))
 start = time.time()
 # generating the hash sheets
 hash_sheet = generate_sheet(m, n)
-# below just for testing
-# print_sheet(hash_sheet, 'Hash sheet of the wall:')
-hash_1 = generate_sheet(m, n)
-hash_2 = generate_sheet(m, n)
 # generating a label sheet as output
 label_sheet = generate_sheet(m, n)
-# generating position pointers
-position_sheet = generate_sheet(m, n)
-position_1 = generate_sheet(m, n)
-position_2 = generate_sheet(m, n)
 
 
 def coordinate_matrix_modify(hash_matrix, lx, ly, rx, ry, to_value, check_same=False, check_value=0):
@@ -149,16 +139,11 @@ def recursion(step, coor_x, coor_y):
                 if not isSkip:
                     coordinate_matrix_modify(label_sheet, thing['x_l'], thing['y_l'],
                                              thing['x_r'], thing['y_r'], step + 1)
-                    # print_sheet(label_sheet, 'Label sheet')
-                    coordinate_matrix_modify(position_sheet, thing['x_l'], thing['y_l'],
-                                             thing['x_l'], thing['y_l'], 1)
                     # recurse the next step
                     recursion(step + 1, coor_x, coor_y)
                     # if dont recurse, undo the changes
                     coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
                                              thing['x_r'], thing['y_r'], 0)
-                    coordinate_matrix_modify(position_sheet, thing['x_l'], thing['y_l'],
-                                             thing['x_l'], thing['y_l'], 0)
                     coordinate_matrix_modify(label_sheet, thing['x_l'], thing['y_l'],
                                              thing['x_r'], thing['y_r'], 0)
 
@@ -166,17 +151,10 @@ def recursion(step, coor_x, coor_y):
         # print_sheet(hash_sheet, 'Hash check:')
         label = deepcopy(label_sheet)
         result_label.append(label)
-        position = deepcopy(position_sheet)
-        pos_1 = deepcopy(position_1)
-        pos_2 = deepcopy(position_2)
-        result_position.append(position)
-        result_position_1.append(pos_1)
-        result_position_2.append(pos_2)
         t = time.time()
         global number
-        number.append(1)
+        number.append(0)
         print('\rTime {:.2f} s, the {} th'.format(t-start, len(number)), flush=True, end='')
-
 
 
 # check if the brick can fill the wall completely
@@ -203,8 +181,6 @@ for x in range(0, m):
             ll_dict['y_l'] = y
             ll_dict['x_r'] = end_x
             ll_dict['y_r'] = end_y
-            ll_dict['status'] = False
-            ll_dict['dirc'] = 1
             ll_mode.append(ll_dict)
         # length-width mode:
         end_x, end_y = x+b-1, y+a-1
@@ -213,8 +189,6 @@ for x in range(0, m):
             lw_dict['y_l'] = y
             lw_dict['x_r'] = end_x
             lw_dict['y_r'] = end_y
-            lw_dict['status'] = False
-            lw_dict['dirc'] = 2
             lw_mode.append(lw_dict)
 # below print only for test
 # print('All possible arrangements:')
@@ -227,48 +201,63 @@ else:
     all_mode = ll_mode+lw_mode
 if canFill:
     recursion(0, 0, 0)
-"""
-# only for testing
-for thing in result_label:
-    print_sheet(thing, "Label Diagram:")
-for thing in result_position:
-    print_sheet(thing, "Position Diagram:")
-"""
-for thing in result_label:
-    print_sheet(thing, 'Final Result')
+
 end = time.time()
 duration = end - start
-print('There are {} forms of arrangements'.format(len(result_label)))
-print('Time consuming: {:.3}s'.format(duration))
-print('Times that recurse: {}'.format(len(number)))
 
-print("Standardized form of output:")
 # converting hash into standard form:
-for num in range(0, len(result_label)):
+print('\nNow converting results into standard results, please wait')
+standard_result = []
+s_time = time.time()
+for thing in result_label:
     all_brick = []
     while len(all_brick) < m*n/a/b:
-        for index in range(0, int(m*n/a/b)):
+        for index in range(1, int(m*n/a/b) + 1):
             brick = []
             while len(brick) < a*b:
-                for row in range(0, len(result_label[num])):
-                    for col in range(0, len(result_label[num][row])):
-                        if result_label[num][row][col] == index:
-                            coor = row*len(result_label[num][row]) + col + 1
+                for row in range(0, len(thing)):
+                    for col in range(0, len(thing[row])):
+                        if thing[row][col] == index:
+                            coor = row*len(thing[row]) + col + 1
                             brick.append(coor)
             all_brick.append(brick)
-            print(brick)
-    print(all_brick)
+    standard_result.append(all_brick)
+    proc = len(all_brick)/len(result_label)
+    cur_time = time.time()
+    print('\rCurrent process {:.2%}, remaining time {:.2f} s'.format(proc, cur_time - s_time), end='', flush=True)
 
+print('\nThere are {} forms of arrangements'.format(len(result_label)))
+print('Time consuming: {:.3}s'.format(duration))
+print('All results will be print when the turtle has done all maps(or turtle has been turned off)')
+# generating colors in random:
+colors = []
+for times in range(0, int(m*n/a/b)):
+    r, g, b = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+    colors.append((r, g, b))
 # drawing the rectangle
 screen = t.Screen()
 a_t = t.Turtle()
+a_t.speed(0)
 a_t.up()
 a_t.goto(0, -300)
 a_t.down()
-for i in range(0, 4):
-    a_t.forward(300)
-    a_t.left(90)
-    a_t.forward(300)
 # drawing inner rectangle
+width = 500/min(m, n)
+a_t.right(90)
 
+
+result = result_label[random.randint(0, len(result_label))]
+for row in range(0, len(result)):
+    for col in range(0, len(result[row])):
+        a_t.up()
+        a_t.goto(-300 + col * width, 300 - row * width)
+        screen.colormode(255)
+        a_t.fillcolor(colors[(result[row][col]) - 1])
+        a_t.begin_fill()
+        for i in range(0, 4):
+            a_t.forward(width)
+            a_t.left(90)
+        a_t.end_fill()
 t.done()
+for thing in standard_result:
+    print(thing)
