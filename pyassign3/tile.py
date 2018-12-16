@@ -122,30 +122,33 @@ def recursion(step, coor_x, coor_y):
     global fill_times
     if step < fill_times:
         for thing in all_mode:
-            isFind = False
-            for row in range(coor_y, n):
-                if not isFind:
-                    for col in range(0, m):
-                        if hash_sheet[row][col] == 0:
-                            if (row == 0 or hash_sheet[row - 1][col] == 1) and (col == 0 or hash_sheet[row][col - 1] == 1):
-                                coor_y = row
-                                coor_x = col
-                                isFind = True
-                else:
-                    break
-            if coor_x == thing['x_l'] and coor_y == thing['y_l']:
-                isSkip = coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
-                                                  thing['x_r'], thing['y_r'], 1, check_same=True)
-                if not isSkip:
-                    coordinate_matrix_modify(label_sheet, thing['x_l'], thing['y_l'],
-                                             thing['x_r'], thing['y_r'], step + 1)
-                    # recurse the next step
-                    recursion(step + 1, coor_x, coor_y)
-                    # if dont recurse, undo the changes
-                    coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
-                                             thing['x_r'], thing['y_r'], 0)
-                    coordinate_matrix_modify(label_sheet, thing['x_l'], thing['y_l'],
-                                             thing['x_r'], thing['y_r'], 0)
+            if not thing['used']:
+                isFind = False
+                for row in range(coor_y, n):
+                    if not isFind:
+                        for col in range(0, m):
+                            if hash_sheet[row][col] == 0:
+                                if (row == 0 or hash_sheet[row - 1][col] == 1) and (col == 0 or hash_sheet[row][col - 1] == 1):
+                                    coor_y = row
+                                    coor_x = col
+                                    isFind = True
+                    else:
+                        break
+                if coor_x == thing['x_l'] and coor_y == thing['y_l']:
+                    isSkip = coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
+                                                      thing['x_r'], thing['y_r'], 1, check_same=True)
+                    if not isSkip:
+                        coordinate_matrix_modify(label_sheet, thing['x_l'], thing['y_l'],
+                                                 thing['x_r'], thing['y_r'], step + 1)
+                        thing['used'] = True
+                        # recurse the next step
+                        recursion(step + 1, coor_x, coor_y)
+                        thing['used'] = False
+                        # if dont recurse, undo the changes
+                        coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
+                                                 thing['x_r'], thing['y_r'], 0)
+                        coordinate_matrix_modify(label_sheet, thing['x_l'], thing['y_l'],
+                                                 thing['x_r'], thing['y_r'], 0)
 
     elif step == fill_times:
         # print_sheet(hash_sheet, 'Hash check:')
@@ -181,6 +184,7 @@ for x in range(0, m):
             ll_dict['y_l'] = y
             ll_dict['x_r'] = end_x
             ll_dict['y_r'] = end_y
+            ll_dict['used'] = False
             ll_mode.append(ll_dict)
         # length-width mode:
         end_x, end_y = x+b-1, y+a-1
@@ -189,6 +193,7 @@ for x in range(0, m):
             lw_dict['y_l'] = y
             lw_dict['x_r'] = end_x
             lw_dict['y_r'] = end_y
+            lw_dict['used'] = False
             lw_mode.append(lw_dict)
 # below print only for test
 # print('All possible arrangements:')
@@ -222,7 +227,7 @@ for thing in result_label:
                             brick.append(coor)
             all_brick.append(brick)
     standard_result.append(all_brick)
-    proc = len(all_brick)/len(result_label)
+    proc = len(standard_result)/len(result_label)
     cur_time = time.time()
     print('\rCurrent process {:.2%}, remaining time {:.2f} s'.format(proc, cur_time - s_time), end='', flush=True)
 
