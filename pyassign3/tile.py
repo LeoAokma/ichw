@@ -135,9 +135,8 @@ def recursion(step, coor_x, coor_y):
                     else:
                         break
                 if coor_x == thing['x_l'] and coor_y == thing['y_l']:
-                    isSkip = coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
-                                                      thing['x_r'], thing['y_r'], 1, check_same=True)
-                    if not isSkip:
+                    if not coordinate_matrix_modify(hash_sheet, thing['x_l'], thing['y_l'],
+                                                    thing['x_r'], thing['y_r'], 1, check_same=True):
                         coordinate_matrix_modify(label_sheet, thing['x_l'], thing['y_l'],
                                                  thing['x_r'], thing['y_r'], step + 1)
                         thing['used'] = True
@@ -196,8 +195,6 @@ for x in range(0, m):
             lw_dict['used'] = False
             lw_mode.append(lw_dict)
 # below print only for test
-# print('All possible arrangements:')
-# print(ll_mode, len(ll_mode), lw_mode, len(lw_mode), sep='\n')
 fill_times = int(m*n/a/b)
 # here begin the main analyse and arrangements of the brick
 if a == b:
@@ -229,7 +226,7 @@ for thing in result_label:
     standard_result.append(all_brick)
     proc = len(standard_result)/len(result_label)
     cur_time = time.time()
-    print('\rCurrent process {:.2%}, remaining time {:.2f} s'.format(proc, cur_time - s_time), end='', flush=True)
+    print('\rCurrent process {:.2%}, remaining time {:.2f} s'.format(proc, (cur_time - s_time)/proc*(1-proc)), end='', flush=True)
 
 print('\nThere are {} forms of arrangements'.format(len(result_label)))
 print('Time consuming: {:.3}s'.format(duration))
@@ -237,8 +234,8 @@ print('All results will be print when the turtle has done all maps(or turtle has
 # generating colors in random:
 colors = []
 for times in range(0, int(m*n/a/b)):
-    r, g, b = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
-    colors.append((r, g, b))
+    r, g, l = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+    colors.append((r, g, l))
 # drawing the rectangle
 screen = t.Screen()
 a_t = t.Turtle()
@@ -251,7 +248,11 @@ width = 500/min(m, n)
 a_t.right(90)
 
 
-result = result_label[random.randint(0, len(result_label))]
+if a == b:
+    result = result_label[0]
+else:
+    result = result_label[random.randint(0, len(result_label))]
+
 for row in range(0, len(result)):
     for col in range(0, len(result[row])):
         a_t.up()
