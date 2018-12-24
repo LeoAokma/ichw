@@ -7,6 +7,7 @@ __email__  = "1800011753@pku.edu.cn"
 
 import sys
 from urllib.request import urlopen
+import urllib
 
 
 def wcount(lines, topn=10):
@@ -70,7 +71,12 @@ if __name__ == '__main__':
         topn = 10
     else:
         topn = sys.argv[2]
-    web_file = urlopen(url)
+    while True
+        try:
+            web_file = urlopen(url)
+            break
+        except urllib.request.HTTPError or urllib.request.URLError:
+            print('Web path unexist or denied request!')
     lines_byte = web_file.read()
     web_file.close()
     lines = bytes.decode(lines_byte)
