@@ -71,7 +71,7 @@ if __name__ == '__main__':
         topn = 10
     else:
         topn = sys.argv[2]
-    while True
+    while True:
         try:
             web_file = urlopen(url)
             break
