@@ -73,12 +73,11 @@ if __name__ == '__main__':
         topn = sys.argv[2]
     try:
         web_file = urlopen(url)
+        lines_byte = web_file.read()
+        web_file.close()
+        lines = bytes.decode(lines_byte)
+        wcount(lines, topn)
     except urllib.request.URLError:
         sys.stdout.write('Web path unexist or denied request!')
     except urllib.request.HTTPError:
         sys.stdout.write('Unexist')
-    lines_byte = web_file.read()
-    web_file.close()
-    lines = bytes.decode(lines_byte)
-    wcount(lines, topn)
-    # should anayze whether paras are right or not
