@@ -79,5 +79,7 @@ if __name__ == '__main__':
         wcount(lines, topn)
     except urllib.request.URLError:
         sys.stdout.write('Web path unexist or denied request!')
-    except urllib.request.HTTPError:
-        sys.stdout.write('Unexist')
+    except ValueError:
+        sys.stdout.write('Unsupported url format "{}" !'.format(url))
+    except Exception:
+        sys.stdout.write('Other unpredictable error, please ensure the url starts with "http://" and check your spelling')
