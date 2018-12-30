@@ -71,12 +71,12 @@ if __name__ == '__main__':
         topn = 10
     else:
         topn = sys.argv[2]
-    while True:
-        try:
-            web_file = urlopen(url)
-            break
-        except urllib.request.HTTPError or urllib.request.URLError:
-            print('Web path unexist or denied request!')
+    try:
+        web_file = urlopen(url)
+    except urllib.request.URLError:
+        sys.stdout.write('Web path unexist or denied request!')
+    except urllib.request.HTTPError:
+        sys.stdout.write('Unexist')
     lines_byte = web_file.read()
     web_file.close()
     lines = bytes.decode(lines_byte)
