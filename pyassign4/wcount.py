@@ -70,7 +70,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 2:
         topn = 10
     else:
-        topn = sys.argv[2]
+        topn = int(sys.argv[2])
     try:
         web_file = urlopen(url)
         lines_byte = web_file.read()
