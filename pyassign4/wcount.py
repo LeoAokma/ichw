@@ -81,5 +81,6 @@ if __name__ == '__main__':
         sys.stdout.write('Web path unexist or denied request!')
     except ValueError:
         sys.stdout.write('Unsupported url format "{}" !'.format(url))
-    #except Exception:
-        #sys.stdout.write('Other unpredictable error, please ensure the url starts with "http://" and check your spelling')
+    except Exception:
+        sys.stdout.write('Other unpredictable error, please ensure the'
+                         ' url starts with "http://" and check your spelling')
